@@ -1,6 +1,6 @@
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import split, col, when
+from pyspark.sql.functions import split, col, when, concat_ws
 
 def main():
     spark = SparkSession.builder \
@@ -44,7 +44,10 @@ def main():
     df_merged.show()
 
     output_path = "hdfs://haruna/home/byte_search_ecom/user/taoxinrui/merged_output"
-    df_merged.write.mode("overwrite").option("delimiter", "\x01").csv(output_path)
+    
+    all_columns = df_merged.columns
+    df_output = df_merged.select(concat_ws("\x01", *all_columns).alias("value"))
+    df_output.write.mode("overwrite").text(output_path)
 
     spark.stop()
 
